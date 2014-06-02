@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Gopher Web Server'
-  ClientHeight = 502
+  ClientHeight = 388
   ClientWidth = 689
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -34,9 +34,10 @@ object Form1: TForm1
     Left = 8
     Top = 8
     Width = 433
-    Height = 486
+    Height = 369
     Lines.Strings = (
-      'Memo1')
+      'MESSAGES CONSOL:'
+      '-----------------------------------------')
     ScrollBars = ssVertical
     TabOrder = 0
   end
@@ -75,6 +76,24 @@ object Form1: TForm1
     Caption = 'wwwroot'
     TabOrder = 4
     OnClick = Button2Click
+  end
+  object Button3: TButton
+    Left = 525
+    Top = 91
+    Width = 75
+    Height = 25
+    Caption = 'Test JS'
+    TabOrder = 5
+    OnClick = Button3Click
+  end
+  object Button4: TButton
+    Left = 525
+    Top = 122
+    Width = 75
+    Height = 25
+    Caption = 'Call JS'
+    TabOrder = 6
+    OnClick = Button4Click
   end
   object IdHTTPServer1: TIdHTTPServer
     Bindings = <>

@@ -6,9 +6,16 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, IdBaseComponent, IdComponent, IdContext,
   IdCustomTCPServer, IdCustomHTTPServer, IdHTTPServer, Vcl.StdCtrls,
-  Vcl.Samples.Spin, JvBaseDlg, JvBrowseFolder;
+  Vcl.Samples.Spin, JvBaseDlg, JvBrowseFolder, js15decl,jsintf;
 
 type
+
+  [JSClassName('App')]
+  TJSAppObject = class(TJSClass)
+  public
+    procedure testCall;
+  end;
+
   TForm1 = class(TForm)
     IdHTTPServer1: TIdHTTPServer;
     Memo1: TMemo;
@@ -19,6 +26,8 @@ type
     Label2: TLabel;
     Edit1: TEdit;
     Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
     procedure IdHTTPServer1SessionEnd(Sender: TIdHTTPSession);
     procedure IdHTTPServer1SessionStart(Sender: TIdHTTPSession);
     procedure IdHTTPServer1CommandGet(AContext: TIdContext;
@@ -27,11 +36,22 @@ type
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     { Private declarations }
      FHTMLDir: string;
+
+    FJSEngine: TJSEngine;
+    FJSAppObject: TJSAppObject;
+
  public
     { Public declarations }
+  end;
+
+
+  TJSGlobalFunctions = class
+    class procedure ShowMessage(s: string);
   end;
 
 var
@@ -39,7 +59,7 @@ var
 
 implementation
 
-uses ioutils;
+uses ioutils,typinfo;
 
 {$R *.dfm}
 
@@ -65,6 +85,21 @@ begin
   FHTMLDir := JvBrowseForFolderDialog1.Directory;
   Edit1.Text := FHTMLDir;
  end;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  FJSEngine := TJSEngine.Create;
+  FJSEngine.registerGlobalFunctions(TJSGlobalFunctions);
+  FJSAppObject:= TJSAppObject.CreateJSObject(FJSEngine, 'App') ;
+  TJSClass.CreateJSObject(Self, FJSEngine, 'Form1', [cfaInheritedMethods, cfaInheritedProperties]);
+  FJSEngine.EvaluateFile(FHTMLDir + '\test.js');
+  FJSEngine.CallFunction('main');
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  FJSEngine.CallFunction('CallMe');
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -116,11 +151,20 @@ begin
    Bytes := TFile.ReadAllBytes(LPathname);
    S := TEncoding.UTF8.GetString(Bytes);
 
+   if (xType='text/html') then
+   begin
+     s := s + '<script>alert("Gopher was here");</script>';
+   end;
+
    AResponseInfo.ContentText := s;
    AResponseInfo.ContentEncoding := 'utf-8';
   //AResponseInfo.ContentLength := AResponseInfo.ContentStream.Size;
-   AResponseInfo.ContentType := xType+'; charset=UTF-8';
+   AResponseInfo.ContentType := xType;
    AResponseInfo.ResponseNo := 200;
+   AResponseInfo.CharSet := 'UTF-8';
+   AResponseInfo.ContentVersion :='HTTP/1.1';
+   AResponseInfo.ResponseText := '200 OK';
+
    AResponseInfo.WriteHeader;
    AResponseInfo.WriteContent;
    AResponseInfo.ContentStream.Free;
@@ -131,6 +175,8 @@ begin
    AResponseInfo.ContentLength := AResponseInfo.ContentStream.Size;
    AResponseInfo.ContentType := xType;
    AResponseInfo.ResponseNo := 200;
+   AResponseInfo.ContentVersion :='HTTP/1.1';
+   AResponseInfo.ResponseText := 'OK';
    AResponseInfo.WriteHeader;
    AResponseInfo.WriteContent;
    AResponseInfo.ContentStream.Free;
@@ -154,5 +200,20 @@ procedure TForm1.IdHTTPServer1SessionStart(Sender: TIdHTTPSession);
 begin
 //
 end;
+
+{ TJSGlobalFunctions }
+
+class procedure TJSGlobalFunctions.ShowMessage(s: string);
+begin
+  Form1.Memo1.Lines.Add('MSG FROM JS:' + s);
+end;
+
+{ TJSAppObject }
+
+procedure TJSAppObject.testCall;
+begin
+  Form1.Memo1.Lines.Add('I WAS Called to RUN FROM THE JavaScript File');
+end;
+
 
 end.

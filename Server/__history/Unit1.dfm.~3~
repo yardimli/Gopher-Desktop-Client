@@ -1,0 +1,64 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Gopher Web Server'
+  ClientHeight = 502
+  ClientWidth = 689
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 528
+    Top = 11
+    Width = 24
+    Height = 13
+    Caption = 'Port:'
+  end
+  object Memo1: TMemo
+    Left = 8
+    Top = 8
+    Width = 433
+    Height = 486
+    Lines.Strings = (
+      'Memo1')
+    ScrollBars = ssVertical
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 558
+    Top = 36
+    Width = 75
+    Height = 25
+    Caption = 'Start Server'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object SpinEdit1: TSpinEdit
+    Left = 558
+    Top = 8
+    Width = 121
+    Height = 22
+    MaxValue = 0
+    MinValue = 0
+    TabOrder = 2
+    Value = 8080
+  end
+  object IdHTTPServer1: TIdHTTPServer
+    Bindings = <>
+    ServerSoftware = 'GopherSever'
+    SessionState = True
+    SessionTimeOut = 600000
+    OnSessionStart = IdHTTPServer1SessionStart
+    OnSessionEnd = IdHTTPServer1SessionEnd
+    OnCommandGet = IdHTTPServer1CommandGet
+    Left = 208
+    Top = 56
+  end
+end

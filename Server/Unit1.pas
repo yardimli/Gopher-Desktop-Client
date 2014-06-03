@@ -27,7 +27,7 @@ type
     Edit1: TEdit;
     Button2: TButton;
     Button3: TButton;
-    Button4: TButton;
+    Button5: TButton;
     procedure IdHTTPServer1SessionEnd(Sender: TIdHTTPSession);
     procedure IdHTTPServer1SessionStart(Sender: TIdHTTPSession);
     procedure IdHTTPServer1CommandGet(AContext: TIdContext;
@@ -37,7 +37,7 @@ type
     procedure Button2Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure Button3Click(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
   private
     { Private declarations }
      FHTMLDir: string;
@@ -59,7 +59,7 @@ var
 
 implementation
 
-uses ioutils,typinfo;
+uses ioutils,typinfo,RTTI,superobject;
 
 {$R *.dfm}
 
@@ -93,13 +93,13 @@ begin
   FJSEngine.registerGlobalFunctions(TJSGlobalFunctions);
   FJSAppObject:= TJSAppObject.CreateJSObject(FJSEngine, 'App') ;
   TJSClass.CreateJSObject(Self, FJSEngine, 'Form1', [cfaInheritedMethods, cfaInheritedProperties]);
-  FJSEngine.EvaluateFile(FHTMLDir + '\test.js');
-  FJSEngine.CallFunction('main');
+  FJSEngine.EvaluateFile(FHTMLDir + '\parser.js');
+//  FJSEngine.CallFunction('main');
 end;
 
-procedure TForm1.Button4Click(Sender: TObject);
+procedure TForm1.Button5Click(Sender: TObject);
 begin
-  FJSEngine.CallFunction('CallMe');
+ FJSEngine.CallFunction('main');
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -121,7 +121,10 @@ var
   xType : string;
   xFileStream : TFileStream;
   Bytes: TBytes;
-  s : WideString;
+  s,s2 : String;
+
+  obj,pos: ISuperObject;
+  returnval : jsval;
 begin
  Memo1.Lines.Add(' File: ' + ARequestInfo.Document);
  Memo1.Lines.Add( 'Command: ' + ARequestInfo.Command +
@@ -150,10 +153,24 @@ begin
   begin
    Bytes := TFile.ReadAllBytes(LPathname);
    S := TEncoding.UTF8.GetString(Bytes);
-
-   if (xType='text/html') then
+   s2 := s;
+   if (xType='application/javascript') then
    begin
-     s := s + '<script>alert("Gopher was here");</script>';
+     s2 := StringReplace(s2,chr(13)+chr(10),'\n\'+chr(13)+chr(10),[rfReplaceAll]);
+//     s := StringReplace(s,chr(10),' ',[rfReplaceAll]);
+     Memo1.Lines.Add('call parser with: '+s2);
+
+     FJSEngine.Evaluate('ParseMe("'+s2+'");',returnval);
+     Memo1.Lines.Add( JSValToString(FJSEngine.Context,returnval ) );
+
+     obj := SO( JSValToString(FJSEngine.Context,returnval ) );
+     for pos in obj['items'] do begin
+
+           // get the values like this
+           ShowMessage(pos['name'].AsString)
+       end;
+
+//     FJSEngine.CallFunction('ParseMe()', FJSEngine. );
    end;
 
    AResponseInfo.ContentText := s;

@@ -78,22 +78,22 @@ object Form1: TForm1
     OnClick = Button2Click
   end
   object Button3: TButton
+    Left = 606
+    Top = 91
+    Width = 75
+    Height = 25
+    Caption = 'Load Parser'
+    TabOrder = 5
+    OnClick = Button3Click
+  end
+  object Button5: TButton
     Left = 525
     Top = 91
     Width = 75
     Height = 25
-    Caption = 'Test JS'
-    TabOrder = 5
-    OnClick = Button3Click
-  end
-  object Button4: TButton
-    Left = 525
-    Top = 122
-    Width = 75
-    Height = 25
-    Caption = 'Call JS'
+    Caption = 'Call JS Main'
     TabOrder = 6
-    OnClick = Button4Click
+    OnClick = Button5Click
   end
   object IdHTTPServer1: TIdHTTPServer
     Bindings = <>
